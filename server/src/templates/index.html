@@ -1,0 +1,3003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Results Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary-color: #3DD598;
+            --secondary-color: #286053;
+            --bg-dark: #1F2128;
+            --card-dark: #2A2C35;
+            --text-light: #ffffff;
+            --text-gray: #8A8B92;
+            --border-dark: #363842;
+            --success-color: #3DD598;
+            --warning-color: #FFB572;
+            --danger-color: #FF6B6B;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-light);
+            min-height: 100vh;
+        }
+
+        /* Custom Scrollbar Styles */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 5px;
+            border: 2px solid var(--bg-dark);
+            transition: all 0.3s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        /* For Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) var(--bg-dark);
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .sidebar {
+            background: var(--card-dark);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .sidebar-brand {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem;
+            border-radius: 12px;
+            background: rgba(61, 213, 152, 0.1);
+        }
+
+        .sidebar-brand i {
+            color: var(--primary-color);
+            font-size: 2rem;
+        }
+
+        .sidebar-brand span {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.75rem;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: var(--text-gray);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            gap: 1rem;
+            font-weight: 500;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: rgba(61, 213, 152, 0.1);
+            color: var(--primary-color);
+            transform: translateX(5px);
+        }
+
+        .sidebar-menu a i {
+            font-size: 1.25rem;
+        }
+
+        .main-content {
+            background: var(--card-dark);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding: 0 1rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-light);
+            position: relative;
+            padding-left: 1rem;
+        }
+
+        .page-title::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 24px;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        .search-bar {
+            position: relative;
+            width: 350px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 12px;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(61, 213, 152, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-gray);
+        }
+
+        .overview-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .overview-card {
+            background: var(--bg-dark);
+            padding: 2rem;
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .overview-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .overview-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .overview-card i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .overview-card h3 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+
+        .overview-card p {
+            color: var(--text-gray);
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .student-cards {
+            display: grid;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+        }
+
+        .student-card {
+            background: var(--bg-dark);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border-dark);
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+            padding: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .student-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .student-card.active {
+            border-color: var(--primary-color);
+            background: rgba(61, 213, 152, 0.05);
+        }
+
+        .student-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .student-details h3 {
+            font-size: 1.5rem;
+            margin: 0 0 0.5rem 0;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .student-meta {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .student-meta i {
+            color: var(--primary-color);
+        }
+
+        .score-badge {
+            background: rgba(61, 213, 152, 0.1);
+            color: var(--primary-color);
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 2px 4px rgba(61, 213, 152, 0.1);
+        }
+
+        .score-badge i {
+            font-size: 1.2rem;
+        }
+
+        .personal-details {
+            display: none;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-dark);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: rgba(61, 213, 152, 0.05);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(61, 213, 152, 0.1);
+        }
+
+        .info-item:hover {
+            background: rgba(61, 213, 152, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(61, 213, 152, 0.1);
+        }
+
+        .info-label {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-label i {
+            color: var(--primary-color);
+        }
+
+        .info-value {
+            color: var(--text-light);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .section-scores-preview {
+            background: rgba(61, 213, 152, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border: 1px solid rgba(61, 213, 152, 0.1);
+        }
+
+        .section-score {
+            display: grid;
+            grid-template-columns: 120px 1fr 80px;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: rgba(61, 213, 152, 0.05);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(61, 213, 152, 0.1);
+        }
+
+        .section-score:hover {
+            background: rgba(61, 213, 152, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(61, 213, 152, 0.1);
+        }
+
+        .section-name {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .score-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .score-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0;
+            box-shadow: 0 2px 4px rgba(61, 213, 152, 0.2);
+        }
+
+        .score-value {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-align: right;
+        }
+
+        .view-details-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary-color);
+            color: var(--text-light);
+            border: none;
+            border-radius: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1.5rem;
+            box-shadow: 0 4px 6px rgba(61, 213, 152, 0.2);
+        }
+
+        .view-details-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(61, 213, 152, 0.3);
+        }
+
+        .view-details-btn i {
+            font-size: 1.2rem;
+        }
+
+        .question-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            overflow-y: auto;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: relative;
+            background: var(--bg-dark);
+            margin: 2rem auto;
+            width: 90%;
+            max-width: 800px;
+            border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .modal-header h3 {
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(61, 213, 152, 0.1);
+            border: none;
+            color: var(--text-gray);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(61, 213, 152, 0.1);
+        }
+
+        .close-modal:hover {
+            background: rgba(61, 213, 152, 0.2);
+            color: var(--text-light);
+            transform: rotate(90deg);
+        }
+
+        .total-summary {
+            background: rgba(61, 213, 152, 0.1);
+            padding: 1.5rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(61, 213, 152, 0.2);
+            box-shadow: 0 4px 6px rgba(61, 213, 152, 0.1);
+        }
+
+        .summary-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .summary-percentage {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .section-questions {
+            background: var(--card-dark);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            color: var(--text-light);
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0 0 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title i {
+            color: var(--primary-color);
+        }
+
+        .questions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .question-item {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 1.25rem;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-item.correct {
+            border-left-color: var(--success-color);
+        }
+
+        .question-item.incorrect {
+            border-left-color: var(--danger-color);
+        }
+
+        .question-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .question-number {
+            background: rgba(61, 213, 152, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .question-text {
+            color: var(--text-light);
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .answer-item {
+            padding: 1rem;
+            border-radius: 8px;
+            background: rgba(61, 213, 152, 0.05);
+            border: 1px solid rgba(61, 213, 152, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .answer-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(61, 213, 152, 0.1);
+        }
+
+        .answer-item.correct {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .answer-item.incorrect {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .answer-label {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .answer-text {
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+
+            .search-bar {
+                width: 100%;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .answers-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .no-data-message {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(61, 213, 152, 0.05);
+            border-radius: 12px;
+            border: 1px dashed rgba(61, 213, 152, 0.2);
+            margin: 1rem 0;
+        }
+
+        .no-data-message i {
+            font-size: 2rem;
+            color: var(--text-gray);
+            margin-bottom: 1rem;
+        }
+
+        .no-data-message p {
+            color: var(--text-gray);
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .no-scores {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-gray);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .no-scores i {
+            font-size: 2rem;
+            color: var(--text-gray);
+        }
+
+        .no-scores p {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .student-list-header {
+            background: var(--card-dark);
+            padding: 1.5rem;
+            border-radius: 16px;
+            margin: 2rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-left h2 {
+            font-size: 1.5rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-left i {
+            color: var(--primary-color);
+        }
+
+        .student-count {
+            background: rgba(61, 213, 152, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            color: var(--primary-color);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .student-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem 0;
+        }
+
+        .student-card {
+            background: var(--card-dark);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-dark);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .student-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .student-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-gray);
+            font-size: 0.95rem;
+        }
+
+        .info-row i {
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+
+        .view-details-btn {
+            background: rgba(61, 213, 152, 0.1);
+            color: var(--primary-color);
+            border: 1px solid rgba(61, 213, 152, 0.2);
+            padding: 0.75rem;
+            border-radius: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: auto;
+        }
+
+        .view-details-btn:hover {
+            background: var(--primary-color);
+            color: var(--text-light);
+            transform: translateY(-2px);
+        }
+
+        .score-badge {
+            background: rgba(61, 213, 152, 0.1);
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .student-table-container {
+            background: var(--card-dark);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            overflow-x: auto;
+        }
+
+        .student-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 0.75rem;
+        }
+
+        .student-table thead th {
+            background: var(--bg-dark);
+            color: var(--text-gray);
+            font-weight: 500;
+            text-align: left;
+            padding: 1rem;
+            font-size: 0.95rem;
+            border-bottom: 2px solid var(--border-dark);
+        }
+
+        .student-table tbody tr {
+            background: var(--bg-dark);
+            transition: all 0.3s ease;
+        }
+
+        .student-table tbody tr:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .student-table td {
+            padding: 1rem;
+            color: var(--text-light);
+            vertical-align: middle;
+        }
+
+        .student-name {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+        }
+
+        .student-name i {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .college-name {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-gray);
+        }
+
+        .college-name i {
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+
+        .stream-badge {
+            background: rgba(61, 213, 152, 0.1);
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .score-pill {
+            background: rgba(61, 213, 152, 0.1);
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .action-btn:hover {
+            background: var(--primary-color);
+            color: var(--text-light);
+            transform: translateY(-2px);
+        }
+
+        .sort-btn {
+            background: rgba(61, 213, 152, 0.1);
+            border: 1px solid rgba(61, 213, 152, 0.2);
+            color: var(--text-light);
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .sort-btn:hover {
+            background: rgba(61, 213, 152, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .download-btn {
+            background: var(--primary-color);
+            color: var(--text-light);
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(61, 213, 152, 0.2);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(61, 213, 152, 0.3);
+        }
+
+        .no-data {
+            text-align: center;
+        }
+
+        .no-data-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 2rem;
+        }
+
+        .no-data-message i {
+            font-size: 2rem;
+            color: var(--text-gray);
+        }
+
+        .no-data-message p {
+            color: var(--text-gray);
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .student-table-container {
+                padding: 1rem;
+            }
+
+            .student-table thead {
+                display: none;
+            }
+
+            .student-table tbody tr {
+                display: block;
+                margin-bottom: 1rem;
+                padding: 1rem;
+                border-radius: 12px;
+            }
+
+            .student-table td {
+                display: block;
+                padding: 0.5rem 0;
+                text-align: left;
+            }
+
+            .student-table td:before {
+                content: attr(data-label);
+                font-weight: 500;
+                color: var(--text-gray);
+                display: block;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        .dashboard-student-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            padding: 1rem 0;
+        }
+
+        .dashboard-student-card {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-dark);
+            position: relative;
+        }
+
+        .dashboard-student-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .student-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(61, 213, 152, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .student-avatar i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .student-info-dashboard {
+            flex: 1;
+        }
+
+        .student-info-dashboard h3 {
+            font-size: 1.1rem;
+            margin: 0 0 0.5rem 0;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .student-details-dashboard {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .college-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-gray);
+        }
+
+        .college-badge i {
+            color: var(--primary-color);
+            font-size: 0.9rem;
+        }
+
+        .stream-tag {
+            background: rgba(61, 213, 152, 0.1);
+            color: var(--primary-color);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .score-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .score-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .score-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .score-value-dashboard {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            min-width: 60px;
+            text-align: right;
+        }
+
+        .quick-view-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-gray);
+            padding: 0.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+        }
+
+        .quick-view-btn:hover {
+            color: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: var(--bg-dark);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            margin: 2rem auto;
+            position: relative;
+            border: 1px solid var(--border-dark);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--text-light);
+            font-size: 1.5rem;
+        }
+
+        .close-modal {
+            background: transparent;
+            border: none;
+            color: var(--text-gray);
+            cursor: pointer;
+            font-size: 1.25rem;
+            padding: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: var(--text-light);
+            transform: scale(1.1);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .student-overview {
+            background: var(--card-dark);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .overview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .student-basic-info h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.25rem;
+            color: var(--text-light);
+        }
+
+        .student-basic-info p {
+            margin: 0;
+            color: var(--text-gray);
+            font-size: 0.95rem;
+        }
+
+        .total-score {
+            text-align: right;
+        }
+
+        .score-label {
+            display: block;
+            color: var(--text-gray);
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .score-value {
+            background: var(--primary-color);
+            color: var(--text-light);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .student-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .detail-item i {
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+
+        .detail-label {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        .detail-value {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .section-scores {
+            margin: 1.5rem 0;
+        }
+
+        .section-score-item {
+            background: var(--bg-dark);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-dark);
+            transition: all 0.3s ease;
+        }
+
+        .section-score-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .section-name {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .section-stats {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.75rem 1.25rem;
+            background: rgba(61, 213, 152, 0.1);
+            border-radius: 12px;
+            min-width: 100px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .section-progress {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--card-dark);
+            border-radius: 12px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .progress-label {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+        }
+
+        .progress-value {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .performance-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .indicator-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 1rem auto;
+            }
+
+            .student-details-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .answer-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .question-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .question-item.correct .question-status {
+            background: rgba(61, 213, 152, 0.1);
+            color: var(--success-color);
+        }
+
+        .question-item.incorrect .question-status {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--danger-color);
+        }
+
+        .answer-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        .answer-content {
+            color: var(--text-light);
+            font-size: 1rem;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .question-number {
+            background: var(--bg-dark);
+            color: var(--text-light);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .section-score-item {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-dark);
+        }
+
+        .score-pill {
+            background: rgba(61, 213, 152, 0.1);
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .question-item {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-dark);
+            transition: all 0.3s ease;
+        }
+
+        .question-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .answer-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .answer-box {
+            background: var(--card-dark);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .answer-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .answer-correct {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .answer-incorrect {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        @media (max-width: 768px) {
+            .answer-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Enhanced Modal Styles */
+        .modal-content {
+            max-width: 900px;
+            background: var(--bg-dark);
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .action-icon-btn {
+            background: rgba(61, 213, 152, 0.1);
+            border: none;
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-icon-btn:hover {
+            background: var(--primary-color);
+            color: var(--text-light);
+            transform: translateY(-2px);
+        }
+
+        .student-profile {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 2rem;
+            align-items: center;
+            padding: 2rem;
+            background: var(--card-dark);
+            border-radius: 16px;
+            margin-bottom: 2rem;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-avatar i {
+            font-size: 2.5rem;
+            color: var(--text-light);
+        }
+
+        .profile-info h4 {
+            font-size: 1.5rem;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .profile-badges {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .profile-badge {
+            background: rgba(61, 213, 152, 0.1);
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .performance-badge {
+            background: rgba(255, 181, 114, 0.1);
+            color: var(--warning-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .score-circle {
+            position: relative;
+            width: 120px;
+            height: 120px;
+        }
+
+        .circular-chart {
+            width: 120px;
+            height: 120px;
+        }
+
+        .circle-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 3;
+        }
+
+        .circle {
+            fill: none;
+            stroke: var(--primary-color);
+            stroke-width: 3;
+            stroke-linecap: round;
+            transition: stroke-dasharray 1s ease;
+        }
+
+        .score-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .score-text span {
+            display: block;
+        }
+
+        .score-text .score-label {
+            font-size: 0.8rem;
+            color: var(--text-gray);
+            margin-top: 0.25rem;
+        }
+
+        .student-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .stat-box {
+            background: var(--card-dark);
+            padding: 1.5rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-box i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        .stat-value {
+            color: var(--text-light);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .performance-tabs {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            border-bottom: 1px solid var(--border-dark);
+            padding-bottom: 1rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-gray);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: var(--text-light);
+        }
+
+        .tab-btn:not(.active):hover {
+            background: rgba(61, 213, 152, 0.1);
+            color: var(--primary-color);
+        }
+
+        .tab-content {
+            position: relative;
+        }
+
+        .tab-pane {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .analytics-card {
+            background: var(--card-dark);
+            padding: 1.5rem;
+            border-radius: 12px;
+        }
+
+        .analytics-card h4 {
+            margin: 0 0 1.5rem 0;
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .summary-stats {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--bg-dark);
+            border-radius: 8px;
+        }
+
+        .summary-label {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        .summary-value {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .student-profile {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .profile-avatar {
+                margin: 0 auto;
+            }
+
+            .score-circle {
+                margin: 1rem auto;
+            }
+
+            .performance-tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab-btn {
+                flex: 1;
+                min-width: 120px;
+            }
+        }
+
+        /* Streamlined Modal Styles */
+        .modal-content {
+            max-width: 800px;
+            background: var(--bg-dark);
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .student-quick-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .student-quick-info h3 {
+            margin: 0;
+            color: var(--text-light);
+            font-size: 1.5rem;
+        }
+
+        .quick-stats {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .stream-pill, .score-pill {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .stream-pill {
+            background: rgba(61, 213, 152, 0.1);
+            color: var(--primary-color);
+        }
+
+        .score-pill {
+            background: rgba(255, 181, 114, 0.1);
+            color: var(--warning-color);
+        }
+
+        .enhanced-questions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .question-card {
+            background: var(--card-dark);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-dark);
+            transition: all 0.3s ease;
+        }
+
+        .question-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .question-header {
+            background: var(--bg-dark);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .question-number {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .question-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-correct {
+            background: rgba(61, 213, 152, 0.1);
+            color: var(--success-color);
+        }
+
+        .status-incorrect {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--danger-color);
+        }
+
+        .question-content {
+            padding: 1.5rem;
+        }
+
+        .question-text {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .answers-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .answer-box {
+            background: var(--bg-dark);
+            padding: 1.25rem;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .answer-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-gray);
+        }
+
+        .answer-text {
+            color: var(--text-light);
+            font-size: 1rem;
+            padding: 0.75rem;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .answer-correct {
+            border-left: 3px solid var(--success-color);
+        }
+
+        .answer-incorrect {
+            border-left: 3px solid var(--danger-color);
+        }
+
+        @media (max-width: 768px) {
+            .answers-comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Contact Info Styles */
+        .contact-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .contact-card {
+            background: var(--card-dark);
+            border-radius: 12px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-dark);
+        }
+
+        .contact-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-color: var(--primary-color);
+        }
+
+        .contact-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(61, 213, 152, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .contact-icon i {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+        .contact-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .contact-label {
+            color: var(--text-gray);
+            font-size: 0.85rem;
+        }
+
+        .contact-value {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 480px) {
+            .contact-info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Section Scores Summary Styles */
+        .section-scores-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-score-card {
+            background: var(--card-dark);
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid var(--border-dark);
+            transition: all 0.3s ease;
+        }
+
+        .section-score-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-color: var(--primary-color);
+        }
+
+        .section-score-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .section-score-header i {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+        .section-score-header h4 {
+            margin: 0;
+            color: var(--text-light);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .section-score-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .section-score-progress {
+            position: relative;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .section-score-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .section-score-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-score-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .section-score-label {
+            color: var(--text-gray);
+            font-size: 0.85rem;
+        }
+
+        .section-score-value {
+            color: var(--text-light);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .section-score-percentage {
+            background: rgba(61, 213, 152, 0.1);
+            color: var(--primary-color);
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .score-excellent {
+            background: linear-gradient(90deg, #3DD598, #1DB954);
+        }
+
+        .score-good {
+            background: linear-gradient(90deg, #FFB572, #FF9A3D);
+        }
+
+        .score-needs-improvement {
+            background: linear-gradient(90deg, #FF6B6B, #FF4C4C);
+        }
+
+        @media (max-width: 768px) {
+            .section-scores-summary {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>ScoreSheet</span>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="#" class="active" data-page="dashboard"><i class="fas fa-home"></i>Dashboard</a></li>
+                <li><a href="#" data-page="students"><i class="fas fa-users"></i>Students</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="dashboard-header">
+                <h1 class="page-title">Dashboard</h1>
+                <div class="header-actions">
+                </div>
+            </div>
+
+            <div id="dashboardPage">
+                <div class="overview-cards">
+                    <div class="overview-card">
+                        <i class="fas fa-users"></i>
+                        <h3>{{ data.stats.total_students if data and data.stats else 0 }}</h3>
+                        <p>Total Students</p>
+                    </div>
+                    <div class="overview-card">
+                        <i class="fas fa-trophy"></i>
+                        <h3>{{ data.stats.highest_score if data and data.stats else 0 }}</h3>
+                        <p>Highest Score</p>
+                    </div>
+                    <div class="overview-card">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>{{ data.stats.average_score if data and data.stats else 0 }}</h3>
+                        <p>Average Score</p>
+                    </div>
+                </div>
+
+                <div class="student-list-header">
+                    <div class="header-left">
+                        <h2><i class="fas fa-user-graduate"></i> Recent Students</h2>
+                        <span class="student-count">{{ data.stats.total_students if data and data.stats else 0 }} Students</span>
+                    </div>
+                </div>
+
+                <div class="dashboard-student-grid">
+                    {% if data and data.students %}
+                        {% for student in data.students %}
+                        <div class="dashboard-student-card" 
+                             data-name="{{ student.name }}"
+                             data-college="{{ student.pu_college }}"
+                             data-stream="{{ student.stream }}"
+                             data-phone="{{ student.phone }}"
+                             data-address="{{ student.address }}"
+                             data-score="{{ student.total_score }}"
+                             data-exam-date="{{ student.exam_date }}"
+                             data-completion-time="{{ student.completion_time }}"
+                             data-question-details='{{ student.question_details|tojson|safe }}'>
+                            <div class="student-avatar">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <div class="student-info-dashboard">
+                                <h3>{{ student.name if student.name else 'Unnamed Student' }}</h3>
+                                <div class="student-details-dashboard">
+                                    <span class="college-badge">
+                                        <i class="fas fa-university"></i>
+                                        {{ student.pu_college if student.pu_college else 'Not provided' }}
+                                    </span>
+                                    <span class="stream-tag">
+                                        {{ student.stream if student.stream else 'Not specified' }}
+                                    </span>
+                                </div>
+                                <div class="score-container">
+                                    <div class="score-bar">
+                                        <div class="score-progress"></div>
+                                    </div>
+                                    <span class="score-value-dashboard">{{ student.total_score if student.total_score != None else '0' }}/100</span>
+                                </div>
+                            </div>
+                            <button class="quick-view-btn" onclick="showQuestionDetails(event, this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="no-data-message">
+                            <i class="fas fa-info-circle"></i>
+                            <p>No student data available</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div id="studentsPage" style="display: none;">
+                <div class="student-list-header">
+                    <div class="header-left">
+                        <h2><i class="fas fa-user-graduate"></i> Students List</h2>
+                        <span class="student-count">{{ data.stats.total_students if data and data.stats else 0 }} Students</span>
+                    </div>
+                    <div class="header-actions">
+                        <button class="sort-btn" onclick="sortStudents('nameAsc')">
+                            <i class="fas fa-sort-alpha-down"></i> Name
+                        </button>
+                        <button class="sort-btn" onclick="sortStudents('scoreDesc')">
+                            <i class="fas fa-sort-numeric-up"></i> Score
+                        </button>
+                        <button class="download-btn" onclick="downloadStudentData()">
+                            <i class="fas fa-download"></i> Download Excel
+                        </button>
+                    </div>
+                </div>
+
+                <div class="student-table-container">
+                    <table class="student-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>College</th>
+                                <th>Stream</th>
+                                <th>Score</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if data and data.students %}
+                                {% for student in data.students %}
+                                <tr data-name="{{ student.name }}"
+                                    data-college="{{ student.pu_college }}"
+                                    data-stream="{{ student.stream }}"
+                                    data-phone="{{ student.phone }}"
+                                    data-address="{{ student.address }}"
+                                    data-score="{{ student.total_score }}"
+                                    data-exam-date="{{ student.exam_date }}"
+                                    data-completion-time="{{ student.completion_time }}"
+                                    data-question-details='{{ student.question_details|tojson|safe }}'>
+                                    <td>
+                                        <div class="student-name">
+                                            <i class="fas fa-user-graduate"></i>
+                                            {{ student.name if student.name else 'Unnamed Student' }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="college-name">
+                                            <i class="fas fa-university"></i>
+                                            {{ student.pu_college if student.pu_college else 'Not provided' }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="stream-badge">
+                                            {{ student.stream if student.stream else 'Not specified' }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="score-pill">
+                                            <i class="fas fa-chart-bar"></i>
+                                            {{ student.total_score if student.total_score != None else '0' }}/100
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button class="action-btn view-btn" onclick="showQuestionDetails(event, this.closest('tr'))">
+                                            <i class="fas fa-eye"></i>
+                                            View
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="no-data">
+                                        <div class="no-data-message">
+                                            <i class="fas fa-info-circle"></i>
+                                            <p>No student data available</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add this modal HTML at the end of body, before closing body tag -->
+    <div class="question-modal">
+        <div class="modal-content">
+            <button class="close-modal"><i class="fas fa-times"></i></button>
+            <div class="modal-header">
+                <h3>Question Details</h3>
+            </div>
+            <div class="modal-body">
+                <!-- Content will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Question Details Modal -->
+    <div class="modal" id="questionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="student-quick-info">
+                    <h3 id="modalStudentName"></h3>
+                    <div class="contact-info-grid">
+                        <div class="contact-card">
+                            <div class="contact-icon">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            <div class="contact-details">
+                                <span class="contact-label">Phone</span>
+                                <span class="contact-value" id="modalPhone"></span>
+                            </div>
+                        </div>
+                        <div class="contact-card">
+                            <div class="contact-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="contact-details">
+                                <span class="contact-label">Address</span>
+                                <span class="contact-value" id="modalAddress"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="quick-stats">
+                        <span id="modalStream" class="stream-pill"></span>
+                        <span id="modalTotalScore" class="score-pill"></span>
+                    </div>
+                </div>
+                <button class="close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="section-scores-summary"></div>
+                <div class="questions-container">
+                    <div id="questionsList" class="enhanced-questions-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script>
+        // Page Navigation
+        document.querySelectorAll('.sidebar-menu a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelectorAll('.sidebar-menu a').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                
+                const page = link.dataset.page;
+                document.querySelector('.page-title').textContent = link.textContent;
+                
+                // Hide all pages
+                document.getElementById('dashboardPage').style.display = 'none';
+                document.getElementById('studentsPage').style.display = 'none';
+                
+                // Show selected page
+                document.getElementById(page + 'Page').style.display = 'block';
+            });
+        });
+
+        // Enhanced search functionality
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            
+            // Search in dashboard cards
+            document.querySelectorAll('.dashboard-student-card').forEach(card => {
+                const name = card.querySelector('h3')?.textContent.toLowerCase() || '';
+                const college = card.querySelector('.college-badge')?.textContent.toLowerCase() || '';
+                const stream = card.querySelector('.stream-tag')?.textContent.toLowerCase() || '';
+                
+                const isVisible = 
+                    name.includes(searchTerm) || 
+                    college.includes(searchTerm) || 
+                    stream.includes(searchTerm);
+                    
+                card.style.display = isVisible ? 'flex' : 'none';
+            });
+            
+            // Search in students table
+            document.querySelectorAll('.student-table tbody tr').forEach(row => {
+                const name = row.querySelector('.student-name')?.textContent.toLowerCase() || '';
+                const college = row.querySelector('.college-name')?.textContent.toLowerCase() || '';
+                const stream = row.querySelector('.stream-badge')?.textContent.toLowerCase() || '';
+                
+                const isVisible = 
+                    name.includes(searchTerm) || 
+                    college.includes(searchTerm) || 
+                    stream.includes(searchTerm);
+                    
+                row.style.display = isVisible ? '' : 'none';
+            });
+
+            // Show/hide no data message in dashboard
+            const dashboardGrid = document.querySelector('.dashboard-student-grid');
+            const visibleCards = dashboardGrid.querySelectorAll('.dashboard-student-card[style*="display: flex"]');
+            const noDataMessage = dashboardGrid.querySelector('.no-data-message');
+            
+            if (visibleCards.length === 0 && noDataMessage) {
+                noDataMessage.style.display = 'flex';
+            } else if (noDataMessage) {
+                noDataMessage.style.display = 'none';
+            }
+        });
+
+        // Excel Download Function
+        function downloadStudentData() {
+            // Get all student data from the table
+            const students = Array.from(document.querySelectorAll('.student-table tbody tr')).map(row => {
+                const name = row.querySelector('.student-name')?.textContent.trim() || 'Unknown';
+                const college = row.querySelector('.college-name')?.textContent.trim() || 'Not provided';
+                const stream = row.querySelector('.stream-badge')?.textContent.trim() || 'Not specified';
+                const score = row.querySelector('.score-pill')?.textContent.trim() || '0/100';
+                const phone = row.dataset.phone || 'Not provided';
+                const address = row.dataset.address || 'Not provided';
+                const examDate = row.dataset.examDate || 'Not provided';
+                const completionTime = row.dataset.completionTime || 'Not provided';
+                
+                // Get question details
+                const questionDetails = row.dataset.questionDetails ? JSON.parse(row.dataset.questionDetails) : {};
+                
+                // Create student object with basic info
+                const studentData = {
+                    'Name': name,
+                    'College': college,
+                    'Stream': stream,
+                    'Phone': phone,
+                    'Address': address,
+                    'Exam Date': examDate,
+                    'Completion Time': completionTime,
+                    'Total Score': score
+                };
+                
+                // Add section scores only
+                Object.entries(questionDetails).forEach(([section, data]) => {
+                    if (data && data.questions) {
+                        const correctAnswers = data.questions.filter(q => q.is_correct).length;
+                        const totalQuestions = data.questions.length;
+                        const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+                        
+                        // Add section summary only
+                        studentData[`${section} Score`] = `${correctAnswers}/${totalQuestions} (${percentage}%)`;
+                    }
+                });
+                
+                return studentData;
+            });
+
+            if (students.length === 0) {
+                alert('No student data available to download');
+                return;
+            }
+
+            try {
+                // Create workbook
+                const wb = XLSX.utils.book_new();
+                
+                // Convert data to worksheet
+                const ws = XLSX.utils.json_to_sheet(students);
+                
+                // Set column widths
+                const colWidths = [
+                    { wch: 25 },  // Name
+                    { wch: 30 },  // College
+                    { wch: 15 },  // Stream
+                    { wch: 15 },  // Phone
+                    { wch: 40 },  // Address
+                    { wch: 15 },  // Exam Date
+                    { wch: 15 },  // Completion Time
+                    { wch: 15 },  // Total Score
+                ];
+                
+                // Add section score column widths
+                Object.keys(students[0]).forEach(key => {
+                    if (!['Name', 'College', 'Stream', 'Phone', 'Address', 'Exam Date', 'Completion Time', 'Total Score'].includes(key)) {
+                        colWidths.push({ wch: 20 });  // Section scores only
+                    }
+                });
+                
+                ws['!cols'] = colWidths;
+
+                // Add the worksheet to workbook
+                XLSX.utils.book_append_sheet(wb, ws, "Student Results");
+
+                // Generate filename with timestamp
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                const filename = `student_results_${timestamp}.xlsx`;
+
+                // Save the file
+                XLSX.writeFile(wb, filename);
+            } catch (error) {
+                console.error('Error generating Excel file:', error);
+                alert('Error generating Excel file. Please try again.');
+            }
+        }
+
+        // Set progress bar widths
+        document.querySelectorAll('.score-progress').forEach(progress => {
+            const score = parseInt(progress.dataset.score);
+            const total = parseInt(progress.dataset.total);
+            if (total > 0) {
+                const percentage = (score / total) * 100;
+                progress.style.width = `${percentage}%`;
+            } else {
+                progress.style.width = '0%';
+            }
+        });
+
+        function sortStudents(sortType) {
+            // Get current active page
+            const isDashboard = document.getElementById('dashboardPage').style.display !== 'none';
+            
+            if (isDashboard) {
+                // Sort dashboard cards
+                const container = document.querySelector('.dashboard-student-grid');
+                const cards = Array.from(container.getElementsByClassName('dashboard-student-card'));
+                
+                cards.sort((a, b) => {
+                    const nameA = a.querySelector('h3').textContent.toLowerCase();
+                    const nameB = b.querySelector('h3').textContent.toLowerCase();
+                    const scoreA = parseInt(a.querySelector('.score-value-dashboard').textContent) || 0;
+                    const scoreB = parseInt(b.querySelector('.score-value-dashboard').textContent) || 0;
+                    
+                    if (sortType === 'nameAsc') {
+                        return nameA.localeCompare(nameB);
+                    } else if (sortType === 'nameDesc') {
+                        return nameB.localeCompare(nameA);
+                    } else if (sortType === 'scoreDesc') {
+                        return scoreB - scoreA;
+                    } else if (sortType === 'scoreAsc') {
+                        return scoreA - scoreB;
+                    }
+                });
+                
+                // Clear and append sorted cards
+                container.innerHTML = '';
+                cards.forEach(card => container.appendChild(card));
+            } else {
+                // Sort table rows
+                const table = document.querySelector('.student-table');
+                const tbody = table.querySelector('tbody');
+                const rows = Array.from(tbody.querySelectorAll('tr:not(.no-data)'));
+                
+                rows.sort((a, b) => {
+                    const nameA = a.querySelector('.student-name')?.textContent.toLowerCase() || '';
+                    const nameB = b.querySelector('.student-name')?.textContent.toLowerCase() || '';
+                    const scoreA = parseInt(a.querySelector('.score-pill')?.textContent) || 0;
+                    const scoreB = parseInt(b.querySelector('.score-pill')?.textContent) || 0;
+                    
+                    if (sortType === 'nameAsc') {
+                        return nameA.localeCompare(nameB);
+                    } else if (sortType === 'nameDesc') {
+                        return nameB.localeCompare(nameA);
+                    } else if (sortType === 'scoreDesc') {
+                        return scoreB - scoreA;
+                    } else if (sortType === 'scoreAsc') {
+                        return scoreA - scoreB;
+                    }
+                });
+                
+                // Clear and append sorted rows
+                const noDataRow = tbody.querySelector('.no-data')?.parentElement;
+                tbody.innerHTML = '';
+                if (rows.length === 0 && noDataRow) {
+                    tbody.appendChild(noDataRow);
+                } else {
+                    rows.forEach(row => tbody.appendChild(row));
+                }
+            }
+
+            // Update sort button icons
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                const icon = btn.querySelector('i');
+                if (btn.onclick.toString().includes(sortType)) {
+                    // Update icon based on sort type
+                    if (sortType === 'nameAsc') {
+                        icon.className = 'fas fa-sort-alpha-down';
+                    } else if (sortType === 'nameDesc') {
+                        icon.className = 'fas fa-sort-alpha-up';
+                    } else if (sortType === 'scoreDesc') {
+                        icon.className = 'fas fa-sort-numeric-up';
+                    } else if (sortType === 'scoreAsc') {
+                        icon.className = 'fas fa-sort-numeric-down';
+                    }
+                }
+            });
+        }
+
+        // Update the sort button click handlers
+        document.addEventListener('DOMContentLoaded', () => {
+            // Name sort button
+            const nameSortBtn = document.querySelector('.sort-btn:first-child');
+            let nameAscending = true;
+            nameSortBtn.addEventListener('click', () => {
+                sortStudents(nameAscending ? 'nameAsc' : 'nameDesc');
+                nameAscending = !nameAscending;
+            });
+
+            // Score sort button
+            const scoreSortBtn = document.querySelector('.sort-btn:nth-child(2)');
+            let scoreDescending = true;
+            scoreSortBtn.addEventListener('click', () => {
+                sortStudents(scoreDescending ? 'scoreDesc' : 'scoreAsc');
+                scoreDescending = !scoreDescending;
+            });
+        });
+
+        let lastClickTime = 0;
+        const delay = 300;
+
+        function togglePersonalDetails(card) {
+            const currentTime = new Date().getTime();
+            if (currentTime - lastClickTime < delay) {
+                showQuestionDetails(event, card);
+                return;
+            }
+            
+            lastClickTime = currentTime;
+            
+            setTimeout(() => {
+                if (currentTime === lastClickTime) {
+                    const clickedDetails = card.querySelector('.personal-details');
+                    
+                    // If this card is already active, close it
+                    if (card.classList.contains('active')) {
+                        clickedDetails.style.display = 'none';
+                        card.classList.remove('active');
+                        return;
+                    }
+                    
+                    // Close all other cards first
+                    document.querySelectorAll('.student-card').forEach(otherCard => {
+                        if (otherCard !== card) {
+                            const details = otherCard.querySelector('.personal-details');
+                            details.style.display = 'none';
+                            otherCard.classList.remove('active');
+                        }
+                    });
+                    
+                    // Show this card's details
+                    clickedDetails.style.display = 'block';
+                    card.classList.add('active');
+                }
+            }, delay);
+        }
+
+        function showQuestionDetails(event, element) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const card = element.closest('.dashboard-student-card') || element.closest('tr');
+            if (!card) {
+                console.error('No card or row element found');
+                return;
+            }
+
+            // Get student data from data attributes
+            const studentData = {
+                name: card.dataset.name || 'Unknown Student',
+                college: card.dataset.college || 'Not provided',
+                stream: card.dataset.stream || 'Not specified',
+                score: card.dataset.score || '0',
+                phone: card.dataset.phone || 'Not provided',
+                address: card.dataset.address || 'Not provided',
+                questionDetails: card.dataset.questionDetails ? JSON.parse(card.dataset.questionDetails) : {}
+            };
+
+            // Update modal header with student info
+            document.getElementById('modalStudentName').textContent = studentData.name;
+            document.getElementById('modalStream').textContent = studentData.stream;
+            document.getElementById('modalTotalScore').textContent = `${studentData.score}/100`;
+            document.getElementById('modalPhone').textContent = studentData.phone;
+            document.getElementById('modalAddress').textContent = studentData.address;
+
+            // Update section scores summary
+            const sectionScoresSummary = document.querySelector('.section-scores-summary');
+            sectionScoresSummary.innerHTML = '';
+
+            if (Object.keys(studentData.questionDetails).length > 0) {
+                Object.entries(studentData.questionDetails).forEach(([section, data]) => {
+                    if (!data || !data.questions) return;
+                    
+                    const correctAnswers = data.questions.filter(q => q.is_correct).length;
+                    const totalQuestions = data.questions.length;
+                    const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+                    
+                    let scoreClass, icon;
+                    if (percentage >= 75) {
+                        scoreClass = 'score-excellent';
+                        icon = 'trophy';
+                    } else if (percentage >= 50) {
+                        scoreClass = 'score-good';
+                        icon = 'star';
+                    } else {
+                        scoreClass = 'score-needs-improvement';
+                        icon = 'exclamation-circle';
+                    }
+
+                    const sectionCard = document.createElement('div');
+                    sectionCard.className = 'section-score-card';
+                    sectionCard.innerHTML = `
+                        <div class="section-score-header">
+                            <i class="fas fa-${icon}"></i>
+                            <h4>${section}</h4>
+                        </div>
+                        <div class="section-score-stats">
+                            <div class="section-score-progress">
+                                <div class="section-score-bar ${scoreClass}" style="width: ${percentage}%"></div>
+                            </div>
+                            <div class="section-score-info">
+                                <div class="section-score-details">
+                                    <span class="section-score-label">Correct Answers</span>
+                                    <span class="section-score-value">${correctAnswers}/${totalQuestions}</span>
+                                </div>
+                                <span class="section-score-percentage">${percentage}%</span>
+                            </div>
+                        </div>
+                    `;
+                    sectionScoresSummary.appendChild(sectionCard);
+                });
+            }
+
+            // Update questions list
+            const questionsList = document.getElementById('questionsList');
+            questionsList.innerHTML = '';
+
+            if (Object.keys(studentData.questionDetails).length > 0) {
+                Object.entries(studentData.questionDetails).forEach(([section, data]) => {
+                    if (!data || !data.questions) return;
+                    
+                    data.questions.forEach((question, index) => {
+                        const questionCard = document.createElement('div');
+                        questionCard.className = 'question-card';
+                        questionCard.innerHTML = `
+                            <div class="question-header">
+                                <div class="question-number">
+                                    <i class="fas fa-book"></i>
+                                    ${section} - Q${index + 1}
+                                </div>
+                                <div class="question-status ${question.is_correct ? 'status-correct' : 'status-incorrect'}">
+                                    <i class="fas ${question.is_correct ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                                    ${question.is_correct ? 'Correct' : 'Incorrect'}
+                                </div>
+                            </div>
+                            <div class="question-content">
+                                <div class="question-text">
+                                    ${question.question || 'No question text available'}
+                                </div>
+                                <div class="answers-comparison">
+                                    <div class="answer-box ${question.is_correct ? 'answer-correct' : 'answer-incorrect'}">
+                                        <div class="answer-label">
+                                            <i class="fas fa-user"></i>
+                                            Student's Answer
+                                        </div>
+                                        <div class="answer-text">
+                                            ${question.student_answer || 'No answer provided'}
+                                        </div>
+                                    </div>
+                                    <div class="answer-box answer-correct">
+                                        <div class="answer-label">
+                                            <i class="fas fa-check"></i>
+                                            Correct Answer
+                                        </div>
+                                        <div class="answer-text">
+                                            ${question.correct_answer || 'No correct answer available'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        questionsList.appendChild(questionCard);
+                    });
+                });
+            } else {
+                questionsList.innerHTML = `
+                    <div class="no-data-message">
+                        <i class="fas fa-info-circle"></i>
+                        <p>No question details available</p>
+                    </div>
+                `;
+            }
+
+            // Show modal
+            const modal = document.getElementById('questionModal');
+            modal.style.display = 'block';
+
+            // Close modal handlers
+            const closeModal = () => modal.style.display = 'none';
+            modal.querySelector('.close-modal').onclick = closeModal;
+            window.onclick = (e) => e.target === modal && closeModal();
+            document.addEventListener('keydown', (e) => e.key === 'Escape' && closeModal());
+        }
+
+        // Update progress bars
+        function updateProgressBars() {
+            document.querySelectorAll('.dashboard-student-card').forEach(card => {
+                const score = parseInt(card.dataset.score) || 0;
+                const progressBar = card.querySelector('.score-progress');
+                if (progressBar) {
+                    progressBar.style.width = `${score}%`;
+                    if (score >= 75) {
+                        progressBar.style.background = 'linear-gradient(90deg, #3DD598, #1DB954)';
+                    } else if (score >= 50) {
+                        progressBar.style.background = 'linear-gradient(90deg, #FFB572, #FF9A3D)';
+                    } else {
+                        progressBar.style.background = 'linear-gradient(90deg, #FF6B6B, #FF4C4C)';
+                    }
+                }
+            });
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            updateProgressBars();
+            
+            // Add hover effects
+            document.querySelectorAll('.dashboard-student-card').forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-5px)';
+                    card.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.2)';
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0)';
+                    card.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+                });
+            });
+        });
+
+        // Remove old event listeners
+        document.querySelectorAll('.close-modal').forEach(button => {
+            button.replaceWith(button.cloneNode(true));
+        });
+
+        // Add new event listeners for close buttons
+        document.querySelectorAll('.close-modal').forEach(button => {
+            button.addEventListener('click', () => {
+                const modal = document.getElementById('questionModal');
+                modal.style.display = 'none';
+            });
+        });
+
+        // Add this to your existing JavaScript
+        function initializeModal(studentData) {
+            // Update circular progress
+            const score = parseInt(studentData.score);
+            const circle = document.querySelector('.circle');
+            circle.style.strokeDasharray = `${score}, 100`;
+            
+            // Set performance level
+            const performanceLevel = document.getElementById('performanceLevel');
+            if (score >= 75) {
+                performanceLevel.textContent = 'Excellent';
+                performanceLevel.style.background = 'rgba(61, 213, 152, 0.1)';
+                performanceLevel.style.color = 'var(--success-color)';
+            } else if (score >= 50) {
+                performanceLevel.textContent = 'Good';
+                performanceLevel.style.background = 'rgba(255, 181, 114, 0.1)';
+                performanceLevel.style.color = 'var(--warning-color)';
+            } else {
+                performanceLevel.textContent = 'Needs Improvement';
+                performanceLevel.style.background = 'rgba(255, 107, 107, 0.1)';
+                performanceLevel.style.color = 'var(--danger-color)';
+            }
+
+            // Initialize tabs
+            document.querySelectorAll('.tab-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons and panes
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                    
+                    // Add active class to clicked button and corresponding pane
+                    button.classList.add('active');
+                    const tabId = button.dataset.tab + 'Tab';
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    // Initialize charts if analytics tab is selected
+                    if (tabId === 'analyticsTab') {
+                        initializeCharts();
+                    }
+                });
+            });
+        }
+
+        function initializeCharts() {
+            // Time Distribution Chart
+            const timeCtx = document.getElementById('timeChart').getContext('2d');
+            new Chart(timeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Quick (<30s)', 'Normal (30s-2m)', 'Extended (>2m)'],
+                    datasets: [{
+                        data: [30, 50, 20],
+                        backgroundColor: ['#3DD598', '#FFB572', '#FF6B6B']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Accuracy Chart
+            const accuracyCtx = document.getElementById('accuracyChart').getContext('2d');
+            new Chart(accuracyCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Math', 'Science', 'English'],
+                    datasets: [{
+                        label: 'Accuracy %',
+                        data: [85, 65, 75],
+                        backgroundColor: '#3DD598'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        // Add print functionality
+        function printReport() {
+            window.print();
+        }
+
+        // Add PDF download functionality
+        function downloadPDF() {
+            // Implement PDF generation and download
+            alert('PDF download feature coming soon!');
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

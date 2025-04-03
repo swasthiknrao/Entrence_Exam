@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Examination - Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="/static/security.js"></script>
+    <script>
+        // Function to handle loading screen
+        window.onload = function() {
+            // Show loading screen for 3 seconds
+            setTimeout(function() {
+                const loadingScreen = document.querySelector('.loading-screen');
+                const pageContainer = document.querySelector('.page-container');
+                
+                loadingScreen.style.opacity = '0';
+                pageContainer.style.display = 'grid';
+                
+                setTimeout(function() {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }, 3000);
+        };
+    </script>
+    <script src="/static/init.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f5f5f5;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-y: auto;
+            background-image: 
+                linear-gradient(90deg, transparent 79px, #abced4 79px, #abced4 81px, transparent 81px),
+                linear-gradient(#eee .1em, transparent .1em);
+            background-size: 100% 1.2em;
+        }
+
+        .page-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-container {
+            flex: 1;
+            display: none;
+            grid-template-columns: 40% 60%;
+            min-height: 100vh;
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            gap: 1.5rem;
+            position: relative;
+            padding-bottom: 4rem;
+        }
+
+        .banner-side {
+            flex: 0.4;
+            padding: 20px;
+            padding-top: 40px;
+            background: linear-gradient(135deg, #8b4513 0%, #5c2c0c 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+            overflow: visible;
+            height: calc(100vh - 3rem);
+            margin-bottom: 3.5rem;
+        }
+
+        .exam-details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15vh;
+            overflow: visible;
+            padding-bottom: 20px;
+            padding-top: 0;
+        }
+
+        .exam-title-banner {
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.95), rgba(160, 82, 45, 0.95));
+            padding: 2rem;
+            border-radius: 15px;
+            margin-top: 20px;
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 10px 30px rgba(139, 69, 19, 0.2),
+                inset 0 0 20px rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transform: translateY(0);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .exam-title-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.5) 50%, 
+                transparent 100%
+            );
+            animation: shimmer 3s infinite;
+        }
+
+        .exam-title-banner h2 {
+            color: #fff;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: 0.5px;
+            animation: titlePop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            opacity: 0;
+            margin-top: 20px;
+        }
+
+        .exam-title-banner p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.4rem;
+            margin: 0.8rem 0 0;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            letter-spacing: 0.5px;
+            animation: subtitleSlide 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards;
+            opacity: 0;
+        }
+
+        .exam-title-banner .badge {
+            position: absolute;
+            bottom: -15px;
+            right: 20px;
+            background: linear-gradient(135deg, #ffd700, #ffa500);
+            color: #8b4513;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            animation: badgePop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s forwards;
+            opacity: 0;
+            transform-origin: center;
+            z-index: 2;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes titlePop {
+            0% {
+                opacity: 0;
+                transform: scale(0.8) translateY(20px);
+                filter: blur(5px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes subtitleSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+                filter: blur(3px);
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes badgePop {
+            0% {
+                opacity: 0;
+                transform: scale(0.5) rotate(-180deg);
+                filter: blur(3px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .excel-box {
+            margin-top: 0;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 10px;
+            position: relative;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .excel-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .excel-header i {
+            font-size: 1.2rem;
+            color: #4CAF50;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px;
+            border-radius: 6px;
+        }
+
+        .excel-header h3 {
+            color: white;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .excel-cell {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .cell-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .cell-label i {
+            color: #FFC107;
+            font-size: 0.9rem;
+        }
+
+        .cell-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #4CAF50;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            font-family: 'Courier New', monospace;
+            line-height: 1;
+            margin: 4px 0;
+        }
+
+        .cell-unit {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cell-note {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 2px;
+            font-style: italic;
+        }
+
+        .question-pattern {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 15px;
+            position: relative;
+            overflow: visible;
+        }
+
+        .question-pattern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4CAF50, #FFC107, #2196F3);
+        }
+
+        .question-pattern h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .question-pattern h3 i {
+            color: #FFC107;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .subject-grid {
+            display: grid;
+            gap: 10px;
+            max-height: calc(100vh - 450px);
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .subject-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+            margin-bottom: 5px;
+        }
+
+        .subject-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .subject-icon {
+            width: 35px;
+            height: 35px;
+            min-width: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: #FFC107;
+        }
+
+        .subject-name {
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .question-count {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 15px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .loading {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .exam-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 2;
+        }
+
+        .exam-header {
+            background: #fff;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .exam-title {
+            color: #8B4513;
+            font-size: 38px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .exam-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -8px;
+            width: 60%;
+            height: 4px;
+            background: linear-gradient(to right, #8B4513, transparent);
+            border-radius: 2px;
+        }
+
+        .exam-subtitle {
+            color: #666;
+            font-size: 24px;
+            margin-top: 20px;
+            font-weight: 500;
+        }
+
+        .section-tabs {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .section-tab {
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fff;
+            color: #8B4513;
+            border: 2px solid #8B4513;
+        }
+
+        .section-tab.active {
+            background: #8B4513;
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(139, 69, 19, 0.3);
+        }
+
+        .section-tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 69, 19, 0.2);
+        }
+
+        .exam-info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .info-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .info-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(139, 69, 19, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .info-icon i {
+            font-size: 24px;
+            color: #8B4513;
+        }
+
+        .info-title {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 24px;
+            color: #8B4513;
+            font-weight: bold;
+        }
+
+        .exam-features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .feature i {
+            font-size: 2rem;
+            color: #fff;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .feature span {
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature small {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .login-side {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding-bottom: 3.5rem;
+            height: 100%;
+            margin-bottom: 0;
+            padding-top: 0;
+        }
+
+        .college-name-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 1rem;
+            background: white;
+            padding: 15px 25px;
+            position: relative;
+            margin-top: 0;
+        }
+
+        .college-name-header img {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .college-name-header .header-content {
+            flex: 1;
+            text-align: right;
+        }
+
+        .college-name-header h1 {
+            color: #8B0000;
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin: 0;
+            line-height: 1.2;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+
+        .college-name-header p {
+            margin: 5px 0;
+            line-height: 1.3;
+        }
+
+        .college-name-header .society-text {
+            color: #000;
+            font-size: 1.4rem;
+        }
+
+        .college-name-header .affiliation-text {
+            color: #0066cc;
+            font-size: 1.2rem;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(139, 69, 19, 0.1);
+            margin-bottom: 1rem;
+            margin-top: 0;
+        }
+
+        .login-container h2 {
+            color: #8b4513;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .login-container h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(to right, #8b4513, transparent);
+            border-radius: 2px;
+        }
+
+        .login-form {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #e0d5c5;
+            border-radius: 8px;
+            background: #fff;
+            color: #5d4037;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #8b4513;
+            box-shadow: 0 8px 15px rgba(139, 69, 19, 0.1);
+            transform: translateY(-2px);
+            outline: none;
+        }
+
+        .form-group i {
+            position: absolute;
+            right: 1.2rem;
+            top: 3rem;
+            color: #8b4513;
+            font-size: 1.2rem;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .form-group:hover i {
+            transform: scale(1.1);
+            opacity: 1;
+        }
+
+        .form-group.full-width {
+            grid-column: span 3;
+        }
+
+        .begin-btn {
+            background: linear-gradient(45deg, #8b4513, #a0522d);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 1.2rem 2.5rem;
+            cursor: not-allowed;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3),
+                        inset 0 2px 10px rgba(255, 255, 255, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 2rem;
+            width: 100%;
+            opacity: 0.7;
+        }
+
+        .begin-btn.enabled {
+            cursor: pointer;
+            opacity: 1;
+            background: linear-gradient(45deg, #8b4513, #a0522d);
+        }
+
+        .begin-btn.enabled:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(139, 69, 19, 0.4);
+            background: linear-gradient(45deg, #a0522d, #cd853f);
+        }
+
+        .begin-btn i {
+            font-size: 1.4rem;
+            transition: all 0.4s ease;
+            margin-left: 1rem;
+            position: relative;
+            top: 1px;
+        }
+
+        .begin-btn.enabled:hover i {
+            transform: translateX(5px);
+        }
+
+        .important-notice {
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.1), rgba(160, 82, 45, 0.1));
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .important-notice p {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: #8b4513;
+            font-size: 0.9rem;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .important-notice p:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(139, 69, 19, 0.1);
+        }
+
+        .important-notice i {
+            font-size: 1.2rem;
+            color: #8b4513;
+            background: rgba(139, 69, 19, 0.1);
+            padding: 0.8rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .important-notice p:hover i {
+            transform: scale(1.1);
+            background: rgba(139, 69, 19, 0.2);
+        }
+
+        .exam-instructions {
+            margin-top: 1rem;
+            padding: 0.5rem;
+            margin-bottom: 0;
+            padding-bottom: 2rem;
+        }
+
+        .exam-instructions h3 {
+            color: #8b4513;
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 2px solid rgba(139, 69, 19, 0.2);
+            text-align: center;
+        }
+
+        .instruction-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+        }
+
+        .instruction-list li {
+            margin-bottom: 0;
+            padding: 0.8rem;
+        }
+
+        .instruction-list li i {
+            color: #8b4513;
+            font-size: 1.2rem;
+            background: rgba(139, 69, 19, 0.1);
+            padding: 0.8rem;
+            border-radius: 50%;
+        }
+
+        .banner-guidelines {
+            margin-top: 1rem;
+            padding: 1rem;
+        }
+
+        .banner-guidelines h3 {
+            color: #fff;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .guideline-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+        }
+
+        .guideline-card {
+            padding: 0.8rem;
+            gap: 0.8rem;
+        }
+
+        .guideline-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .guideline-card i {
+            color: #fff;
+            font-size: 1.4rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.8rem;
+            border-radius: 50%;
+        }
+
+        .guideline-card p {
+            color: #fff;
+            font-size: 0.95rem;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .time-details span, 
+        .question-details span {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.4rem 0.8rem;
+            border-radius: 15px;
+            color: #fff;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin: 0.3rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 1400px) {
+            .login-form,
+            .instruction-list,
+            .important-notice {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .form-group.full-width,
+            .begin-btn {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .page-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .guideline-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .login-form,
+            .instruction-list,
+            .important-notice {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-group.full-width,
+            .begin-btn {
+                grid-column: span 1;
+            }
+            
+            .begin-btn {
+                font-size: 1.1rem;
+                padding: 1rem 2rem;
+            }
+        }
+
+        /* Loading Screen Styles */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease;
+            padding: 20px;
+        }
+
+        .loading-logo {
+            width: 180px;
+            height: 180px;
+            object-fit: contain;
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: logoFade 2s ease-out forwards;
+        }
+
+        .neet-banner {
+            background: linear-gradient(45deg, #8B4513, #D2691E);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 32px;
+            font-weight: bold;
+            margin: 20px 0;
+            opacity: 0;
+            transform: scale(0.9);
+            animation: bannerPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.5s forwards;
+            box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3);
+            text-align: center;
+            line-height: 1.4;
+            letter-spacing: 2px;
+        }
+
+        @keyframes logoFade {
+            0% {
+                opacity: 0;
+                transform: scale(0.8) translateY(-20px);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.1) translateY(0);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes bannerPop {
+            0% {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .loading-text {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            opacity: 0;
+            animation: textFadeIn 1s ease-out 0.5s forwards;
+        }
+
+        .loading-text h1 {
+            color: #8B4513;
+            font-size: 42px;
+            font-weight: 600;
+            margin: 0 0 15px 0;
+            font-family: 'Segoe UI', sans-serif;
+            transform: translateY(20px);
+            animation: slideUp 0.8s ease-out 0.8s forwards;
+        }
+
+        .loading-text p:nth-of-type(1) {
+            color: #666666;
+            font-size: 20px;
+            margin: 0 0 10px 0;
+            transform: translateY(20px);
+            animation: slideUp 0.8s ease-out 1s forwards;
+        }
+
+        .loading-text p:nth-of-type(2) {
+            color: #888888;
+            font-size: 16px;
+            margin: 0;
+            line-height: 1.5;
+            transform: translateY(20px);
+            animation: slideUp 0.8s ease-out 1.2s forwards;
+        }
+
+        .loading-line {
+            width: 0;
+            height: 4px;
+            background: linear-gradient(to right, #8B4513, #D2691E);
+            margin: 40px auto;
+            border-radius: 2px;
+            animation: lineGrow 1.5s ease-in-out forwards;
+        }
+
+        @keyframes textFadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            0% {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes lineGrow {
+            0% {
+                width: 0;
+            }
+            100% {
+                width: 200px;
+            }
+        }
+
+        /* Remove the spinner and use the line instead */
+        .loading-spinner {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .loading-text h1 {
+                font-size: 32px;
+            }
+            
+            .loading-text p:nth-of-type(1) {
+                font-size: 18px;
+            }
+            
+            .loading-text p:nth-of-type(2) {
+                font-size: 14px;
+            }
+            
+            .loading-logo {
+                width: 140px;
+                height: 140px;
+            }
+        }
+
+        /* Updated footer styles */
+        .footer {
+            background: linear-gradient(135deg, #8b4513, #5c2c0c);
+            color: #FFE4B5;
+            text-align: center;
+            padding: 8px 15px;
+            width: 100%;
+            font-size: 0.85rem;
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 215, 0, 0.3);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.5), transparent);
+        }
+
+        @media (max-width: 768px) {
+            .footer {
+                font-size: 0.8rem;
+                padding: 12px 15px;
+            }
+            .page-container {
+                padding-bottom: 5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- Loading Screen -->
+        <div class="loading-screen">
+            <img src="/static/clglogo.png" alt="College Logo" class="loading-logo">
+            <div class="neet-banner">
+                Scholarship Exam 2025<br>
+                for CA/CS/CMA Aspirants
+            </div>
+            <div class="loading-text">
+                <h1>Dr. B. B. Hegde First Grade College, Kundapura</h1>
+                <p>A Unit of Coondapur Education Society(R)</p>
+                <p>Accredited by NAAC with B++ Grade, Affiliated to Mangalore University, Karnataka</p>
+            </div>
+            <div class="loading-line"></div>
+        </div>
+
+        <div class="page-container">
+            <div class="banner-side">
+                <div class="exam-title-banner">
+                    <h2>Scholarship Exam</h2>
+                    <p>for CA/CS/CMA Aspirants</p>
+                    <span class="badge">2025</span>
+                </div>
+                <div class="excel-box">
+                    <div class="excel-header">
+                        <i class="fas fa-file-excel"></i>
+                        <h3>Examination Duration</h3>
+                    </div>
+                    <div class="excel-cell">
+                        <div class="cell-label">
+                            <i class="fas fa-hourglass-half"></i>
+                            Total Time
+                        </div>
+                        <div class="cell-value" id="examDuration">--</div>
+                        <div class="cell-unit">minutes</div>
+                        <div class="cell-note">Complete all sections within allotted time</div>
+                    </div>
+                </div>
+                
+                <div class="question-pattern">
+                    <h3>
+                        <i class="fas fa-question-circle"></i>
+                        Question Pattern
+                    </h3>
+                    <div class="subject-grid" id="subjectGrid">
+                        <!-- Subject cards will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="login-side">
+                <div class="college-name-header">
+                    <img src="/static/clglogo.png" alt="College Logo">
+                    <div class="header-content">
+                        <h1>Dr. B. B. Hegde First Grade College, Kundapura</h1>
+                        <p class="society-text">A Unit of Coondapur Education Society(R)</p>
+                        <p class="affiliation-text">Accredited by NAAC with B++ Grade, Affiliated to Mangalore University, Karnataka</p>
+                    </div>
+                </div>
+                <div class="login-container">
+                    <h2>Examination Login</h2>
+                    <div class="important-notice">
+                        <p><i class="fas fa-clock"></i> Exam starts exactly at scheduled time</p>
+                        <p><i class="fas fa-door-open"></i> Lab allocation displayed at entrance</p>
+                        <p><i class="fas fa-headset"></i> Lab administrator available for assistance</p>
+                    </div>
+                    <form class="login-form" action="/submit-login" method="POST" onsubmit="return handleLoginAndSubmit(event)" id="loginForm">
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="form-group">
+                            <label for="dob">Date of Birth</label>
+                            <input type="date" id="dob" name="dob" min="1900-01-01" max="2100-12-31" required>
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                        <div class="form-group">
+                            <label for="stream">Stream in PU</label>
+                            <select id="stream" name="stream" required>
+                                <option value="">Select your stream</option>
+                                <option value="Commerce">Commerce</option>
+                                <option value="Arts">Arts</option>
+                                <option value="Science">Science</option>
+                            </select>
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div class="form-group">
+                            <label for="mobile">Mobile Number</label>
+                            <input type="tel" id="mobile" name="mobile" pattern="[0-9]{10}" placeholder="Enter your 10-digit mobile number" required>
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="form-group">
+                            <label for="address">Place</label>
+                            <input type="text" id="address" name="address" placeholder="Enter your place" required>
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <div class="form-group">
+                            <label for="puCollege">PU College Name</label>
+                            <input type="text" id="puCollege" name="puCollege" placeholder="Enter your PU college name" required>
+                            <i class="fas fa-school"></i>
+                        </div>
+                        <div class="form-group" style="grid-column: span 3;">
+                            <button type="submit" class="begin-btn" id="beginBtn" disabled>
+                                <span>Begin Examination</span>
+                                <i class="fas fa-arrow-circle-right"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="exam-instructions">
+                    <h3>Important Instructions</h3>
+                    <ul class="instruction-list">
+                        <li>
+                            <i class="fas fa-ban"></i>
+                            Electronic devices, calculators, or any study materials are not permitted
+                        </li>
+                        <li>
+                            <i class="fas fa-clock"></i>
+                            Arrive 30 minutes before the scheduled examination time
+                        </li>
+                        <li>
+                            <i class="fas fa-water"></i>
+                            Only water bottles with clear labels are allowed
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            Developed by Swasthik, Raveendra and Nithish under the guidance of Mr. Pranam R Betrabet
+        </footer>
+    </div>
+
+    <script>
+        // Initialize with data from Flask
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get data from server-rendered variables
+            const duration = '{{ duration }}' === 'None' ? null : Number('{{ duration }}');
+            const sections = JSON.parse('{{ sections|tojson }}');
+            
+            // Update duration display
+            const durationElement = document.getElementById('examDuration');
+            if (durationElement) {
+                durationElement.textContent = duration ? String(duration) : 'Not set';
+            }
+            
+            // Update question pattern display
+            const subjectGrid = document.getElementById('subjectGrid');
+            if (subjectGrid) {
+                // Clear existing content
+                subjectGrid.innerHTML = '';
+                
+                if (Object.keys(sections).length === 0) {
+                    subjectGrid.innerHTML = '<div class="subject-card"><div class="subject-info"><div class="subject-icon"><i class="fas fa-info-circle"></i></div><span class="subject-name">No courses available</span></div></div>';
+                    return;
+                }
+                
+                // Add course cards
+                Object.entries(sections).forEach(([course, count]) => {
+                    const card = document.createElement('div');
+                    card.className = 'subject-card';
+                    
+                    card.innerHTML = `
+                        <div class="subject-info">
+                            <div class="subject-icon">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                            <span class="subject-name">${course}</span>
+                        </div>
+                        <span class="question-count">${count}</span>
+                    `;
+                    subjectGrid.appendChild(card);
+                });
+            }
+
+            // Add form submission prevention
+            const form = document.getElementById('loginForm');
+            let isSubmitting = false;
+
+            form.addEventListener('submit', function(e) {
+                if (isSubmitting) {
+                    e.preventDefault();
+                    return false;
+                }
+                isSubmitting = true;
+                const submitButton = form.querySelector('button[type="submit"]');
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<span>Submitting...</span><i class="fas fa-spinner fa-spin"></i>';
+            });
+        });
+
+        function handleLoginAndSubmit(event) {
+            // Store data in session storage
+            const name = document.getElementById('name').value;
+            const dob = document.getElementById('dob').value;
+            const puCollege = document.getElementById('puCollege').value;
+            const stream = document.getElementById('stream').value;
+            const mobile = document.getElementById('mobile').value;
+            const address = document.getElementById('address').value;
+
+            // Store in sessionStorage for later use
+            sessionStorage.setItem('name', name);
+            sessionStorage.setItem('dob', dob);
+            sessionStorage.setItem('puCollege', puCollege);
+            sessionStorage.setItem('stream', stream);
+            sessionStorage.setItem('mobile', mobile);
+            sessionStorage.setItem('address', address);
+            sessionStorage.setItem('phone', mobile);
+
+            // Let the form submit normally to the backend
+            return true;
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            // Get form values
+            const name = document.getElementById('name').value;
+            const dob = document.getElementById('dob').value;
+            const puCollege = document.getElementById('puCollege').value;
+            const stream = document.getElementById('stream').value;
+            const mobile = document.getElementById('mobile').value;
+            const address = document.getElementById('address').value;
+
+            // Generate a seat number
+            const seatNumber = generateSeatNumber();
+
+            // Store in sessionStorage for later use
+            sessionStorage.setItem('name', name);
+            sessionStorage.setItem('dob', dob);
+            sessionStorage.setItem('puCollege', puCollege);
+            sessionStorage.setItem('stream', stream);
+            sessionStorage.setItem('mobile', mobile);
+            sessionStorage.setItem('address', address);
+            sessionStorage.setItem('seatNumber', seatNumber);
+            sessionStorage.setItem('phone', mobile);
+
+            // Redirect to exam page
+            window.location.href = '/exam';
+            return false;
+        }
+
+        function generateSeatNumber() {
+            return Math.floor(100000 + Math.random() * 900000);
+        }
+
+        // Add this new function for form validation
+        function validateForm() {
+            const name = document.getElementById('name').value.trim();
+            const dob = document.getElementById('dob').value.trim();
+            const stream = document.getElementById('stream').value.trim();
+            const mobile = document.getElementById('mobile').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const puCollege = document.getElementById('puCollege').value.trim();
+            
+            const beginBtn = document.getElementById('beginBtn');
+            
+            // Check if all fields are filled
+            if (name && dob && stream && mobile && address && puCollege) {
+                // Additional validation for mobile number
+                if (mobile.length === 10 && /^\d+$/.test(mobile)) {
+                    beginBtn.disabled = false;
+                    beginBtn.classList.add('enabled');
+                } else {
+                    beginBtn.disabled = true;
+                    beginBtn.classList.remove('enabled');
+                }
+            } else {
+                beginBtn.disabled = true;
+                beginBtn.classList.remove('enabled');
+            }
+        }
+
+        // Add input event listeners to all form fields
+        document.querySelectorAll('.login-form input, .login-form select').forEach(input => {
+            input.addEventListener('input', validateForm);
+        });
+    </script>
+</body>
+</html> 

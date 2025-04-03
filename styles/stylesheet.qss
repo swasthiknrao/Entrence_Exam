@@ -1,0 +1,215 @@
+/* Global Styles */
+QWidget {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #333;
+}
+
+/* Banner Side */
+#bannerSide {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #8B4513, stop:1 #A0522D);
+    min-width: 400px;
+}
+
+/* College Header */
+#collegeHeader {
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+#collegeName {
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+#societyName {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 18px;
+}
+
+/* Exam Info */
+#examInfo {
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin: 20px;
+}
+
+#durationLabel, #patternLabel {
+    color: white;
+    font-size: 16px;
+    margin: 5px 0;
+}
+
+/* Credentials */
+#credentials {
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin: 20px;
+}
+
+#credLabel {
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Login Side */
+#loginSide {
+    background: white;
+    min-width: 400px;
+}
+
+/* Login Form */
+#loginForm {
+    padding: 40px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+QLineEdit, QTextEdit, QDateEdit {
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    margin: 10px 0;
+}
+
+QLineEdit:focus, QTextEdit:focus, QDateEdit:focus {
+    border-color: #8B4513;
+}
+
+QDateEdit::drop-down {
+    border: none;
+    width: 20px;
+}
+
+QDateEdit::down-arrow {
+    image: url(static/calendar.png);
+    width: 12px;
+    height: 12px;
+}
+
+/* Submit Button */
+#submitBtn {
+    background: #8B4513;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+#submitBtn:hover {
+    background: #A0522D;
+}
+
+#submitBtn:pressed {
+    background: #6B3410;
+}
+
+/* Notices */
+#notices {
+    padding: 20px;
+    background: #f8f8f8;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+#noticeLabel {
+    color: #8B4513;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* Exam View Styles */
+#examHeader {
+    background: #8B4513;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+#timerLabel {
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#questionScroll {
+    border: none;
+}
+
+#questionFrame {
+    background: white;
+    border-radius: 5px;
+    padding: 20px;
+    margin: 10px 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#questionText {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+QRadioButton {
+    font-size: 14px;
+    margin: 5px 0;
+    padding: 5px;
+}
+
+QRadioButton::indicator {
+    width: 18px;
+    height: 18px;
+}
+
+QRadioButton::indicator:unchecked {
+    border: 2px solid #ddd;
+    border-radius: 9px;
+    background: white;
+}
+
+QRadioButton::indicator:checked {
+    border: 2px solid #8B4513;
+    border-radius: 9px;
+    background: #8B4513;
+    image: url(static/radio-checked.png);
+    image-position: center;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    #bannerSide, #loginSide {
+        min-width: 100%;
+    }
+    
+    #loginForm {
+        padding: 20px;
+    }
+    
+    #collegeName {
+        font-size: 20px;
+    }
+    
+    #societyName {
+        font-size: 16px;
+    }
+    
+    #durationLabel, #patternLabel {
+        font-size: 14px;
+    }
+    
+    #questionText {
+        font-size: 14px;
+    }
+    
+    QRadioButton {
+        font-size: 12px;
+    }
+} 
